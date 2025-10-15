@@ -25,7 +25,33 @@ defmodule GettextOps.MixProject do
   defp docs do
     [
       main: "GettextOps",
-      extras: ["README.md"]
+      extras: ["README.md", "CHANGELOG.md", "LICENSE"],
+      source_url: "https://github.com/xnilsson/gettext_ops",
+      source_ref: "v0.1.0",
+      groups_for_modules: [
+        Core: [
+          GettextOps,
+          GettextOps.Config,
+          GettextOps.Parser,
+          GettextOps.Entry,
+          GettextOps.Writer,
+          GettextOps.Output
+        ],
+        Operations: [
+          GettextOps.Operations.ListUntranslated,
+          GettextOps.Operations.Search,
+          GettextOps.Operations.SearchValue,
+          GettextOps.Operations.Translate,
+          GettextOps.Operations.ChangeMsgid
+        ],
+        "Mix Tasks": [
+          Mix.Tasks.GettextOps.ListUntranslated,
+          Mix.Tasks.GettextOps.Search,
+          Mix.Tasks.GettextOps.SearchValue,
+          Mix.Tasks.GettextOps.Translate,
+          Mix.Tasks.GettextOps.ChangeMsgid
+        ]
+      ]
     ]
   end
 
