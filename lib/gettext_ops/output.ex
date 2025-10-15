@@ -68,8 +68,8 @@ defmodule GettextOps.Output do
   ## Examples
 
       iex> message = %Expo.Message.Singular{msgid: ["Sign In"], msgstr: [""]}
-      iex> GettextOps.Output.format_json(message)
-      ~s({"msgid":"Sign In","msgstr":""})
+      iex> GettextOps.Output.format_json(message) |> JSON.decode!()
+      %{"msgid" => "Sign In", "msgstr" => ""}
 
       # With references (JSON key order may vary):
       message = %Expo.Message.Singular{msgid: ["Welcome"], msgstr: ["Välkommen"], references: [[{"lib/home.ex", 5}]]}

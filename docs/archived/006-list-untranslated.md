@@ -1,6 +1,6 @@
 # Task 006: List Untranslated Command
 
-**Status:** `not-started`
+**Status:** `completed`
 **Created:** 2025-10-15
 **Depends On:** `002, 003, 004`
 **Can Be Parallelized:** Yes (parallel with 005, 007, 008)
@@ -25,13 +25,13 @@ For reference, the originial `poflow` implementation in go can be found at: ~/co
 
 ## Deliverables
 
-- [ ] `GettextOps.Operations.ListUntranslated` module
-- [ ] `mix gettext_ops.list_untranslated` task
-- [ ] Support for limit option
-- [ ] JSON and text output
-- [ ] Locale-specific listing
-- [ ] Domain support
-- [ ] Tests for various scenarios
+- [x] `GettextOps.Operations.ListUntranslated` module
+- [x] `mix gettext_ops.list_untranslated` task
+- [x] Support for limit option
+- [x] JSON and text output
+- [x] Locale-specific listing
+- [x] Domain support
+- [x] Tests for various scenarios
 
 ---
 
@@ -137,20 +137,29 @@ defp untranslated?(_), do: false
 
 ## Acceptance Criteria
 
-- [ ] Command lists only untranslated entries
-- [ ] Limit option works correctly
-- [ ] JSON and text output supported
-- [ ] Works with --locale and --domain flags
-- [ ] Helpful error messages
-- [ ] All tests passing
-- [ ] Command documented with @moduledoc and @shortdoc
-- [ ] Functions documented with @doc and @spec
+- [x] Command lists only untranslated entries
+- [x] Limit option works correctly
+- [x] JSON and text output supported
+- [x] Works with --locale and --domain flags
+- [x] Helpful error messages
+- [x] All tests passing (13 unit tests + 14 integration tests)
+- [x] Command documented with @moduledoc and @shortdoc
+- [x] Functions documented with @doc and @spec
 
 ---
 
 ## Progress Log
 
-_Updates will be added here as work progresses_
+### 2025-10-15
+- Started work on task 006
+- All dependencies (002, 003, 004) are completed
+- Beginning implementation of list_untranslated functionality
+- Created `GettextOps.Operations.ListUntranslated` module with full documentation
+- Implemented unit tests (13 tests covering all scenarios)
+- Created `mix gettext_ops.list_untranslated` Mix task with proper CLI interface
+- Implemented integration tests (14 tests covering CLI behavior)
+- All 202 tests passing (including new tests)
+- Task completed successfully
 
 ---
 
