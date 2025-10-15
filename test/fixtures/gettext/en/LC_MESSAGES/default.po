@@ -1,0 +1,10 @@
+## English translations for test domain.
+msgid ""
+msgstr ""
+"Language: en\n"
+
+msgid "hello"
+msgstr "hello"
+
+msgid "world"
+msgstr "world"

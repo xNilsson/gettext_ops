@@ -1,0 +1,9 @@
+## Template file for test domain.
+msgid ""
+msgstr ""
+
+msgid "hello"
+msgstr ""
+
+msgid "world"
+msgstr ""

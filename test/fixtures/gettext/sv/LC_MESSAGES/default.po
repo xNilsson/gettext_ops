@@ -1,0 +1,10 @@
+## Swedish translations for test domain.
+msgid ""
+msgstr ""
+"Language: sv\n"
+
+msgid "hello"
+msgstr "hej"
+
+msgid "world"
+msgstr ""

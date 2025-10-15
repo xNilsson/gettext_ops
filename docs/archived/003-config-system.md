@@ -1,6 +1,6 @@
 # Task 003: Config and Path Resolution
 
-**Status:** `not-started`
+**Status:** `completed`
 **Created:** 2025-10-15
 **Depends On:** `001`
 **Can Be Parallelized:** Yes (can work on in parallel with 002)
@@ -136,7 +136,33 @@ end
 
 ## Progress Log
 
-_Updates will be added here as work progresses_
+### 2025-10-15 - Task Completed
+
+**Implementation:**
+- Created test fixture directory structure with sample .po files for `en` and `sv` locales
+- Implemented complete `GettextOps.Config` module with all required functions:
+  - `gettext_path/0` - Read config from Application environment with default
+  - `default_domain/0` - Read domain config with default
+  - `po_file_path/2` - Resolve locale-specific .po file paths
+  - `pot_file_path/1` - Resolve .pot template paths
+  - `list_po_files/0` - Recursively find all .po files
+  - `list_locales/0` - Extract locale codes from directory structure
+  - `locale_exists?/1` - Check if a locale is available
+- All functions include proper `@doc` and `@spec` annotations
+- Module includes comprehensive `@moduledoc` with configuration examples
+
+**Testing:**
+- Created comprehensive test suite in `test/gettext_ops/config_test.exs`
+- Tests cover all functions with multiple scenarios
+- Tests validate default values and custom configuration
+- Tests use fixture directory for filesystem-dependent tests
+- All 28 tests passing (8 doctests + 20 unit tests)
+
+**Decisions:**
+- Removed filesystem-dependent examples from doctests to avoid false failures
+- Used `Path.wildcard/1` for efficient .po file discovery
+- Functions return empty lists instead of raising errors when directories don't exist
+- Configuration uses standard Elixir `Application.get_env/3` pattern
 
 ---
 
