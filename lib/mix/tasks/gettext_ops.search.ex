@@ -1,6 +1,4 @@
 defmodule Mix.Tasks.GettextOps.Search do
-  use Mix.Task
-
   @shortdoc "Search for entries by msgid (source text)"
 
   @moduledoc """
@@ -34,6 +32,8 @@ defmodule Mix.Tasks.GettextOps.Search do
       mix gettext_ops.search "button" --locale sv --json --limit 5
 
   """
+
+  use Mix.Task
 
   alias GettextOps.Operations.Search
   alias GettextOps.Output

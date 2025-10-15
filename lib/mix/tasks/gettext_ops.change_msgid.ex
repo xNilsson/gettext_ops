@@ -1,6 +1,4 @@
 defmodule Mix.Tasks.GettextOps.ChangeMsgid do
-  use Mix.Task
-
   @shortdoc "Change msgid across all locale files"
 
   @moduledoc """
@@ -86,6 +84,8 @@ defmodule Mix.Tasks.GettextOps.ChangeMsgid do
 
   """
 
+  use Mix.Task
+
   alias GettextOps.Operations.ChangeMsgid
 
   @switches [
@@ -166,18 +166,8 @@ defmodule Mix.Tasks.GettextOps.ChangeMsgid do
       end
 
       # Print each change
-      Enum.each(changes, fn %{file: file, entries: count, sample_msgstr: msgstr} ->
-        Mix.shell().info("✓ #{file} (#{count} #{pluralize("entry", count)})")
-
-        # Only show detailed preview for dry_run
-        if dry_run do
-          Mix.shell().info("  msgid \"#{old_msgid}\" → \"#{new_msgid}\"")
-
-          # Show msgstr if available (empty for .pot files)
-          if msgstr != "" do
-            Mix.shell().info("  msgstr \"#{msgstr}\" (preserved)")
-          end
-        end
+      Enum.each(changes, fn change ->
+        print_file_change(change, old_msgid, new_msgid, dry_run)
       end)
 
       Mix.shell().info("")
@@ -191,6 +181,37 @@ defmodule Mix.Tasks.GettextOps.ChangeMsgid do
           "Updated #{files_updated} #{pluralize("file", files_updated)} with #{entries_updated} total #{pluralize("entry", entries_updated)}"
         )
       end
+    end
+
+    :ok
+  end
+
+  # Print a single file change
+  @spec print_file_change(map(), String.t(), String.t(), boolean()) :: :ok
+  defp print_file_change(
+         %{file: file, entries: count, sample_msgstr: msgstr},
+         old_msgid,
+         new_msgid,
+         dry_run
+       ) do
+    Mix.shell().info("✓ #{file} (#{count} #{pluralize("entry", count)})")
+
+    # Only show detailed preview for dry_run
+    if dry_run do
+      print_dry_run_details(old_msgid, new_msgid, msgstr)
+    end
+
+    :ok
+  end
+
+  # Print dry run details for a file change
+  @spec print_dry_run_details(String.t(), String.t(), String.t()) :: :ok
+  defp print_dry_run_details(old_msgid, new_msgid, msgstr) do
+    Mix.shell().info("  msgid \"#{old_msgid}\" → \"#{new_msgid}\"")
+
+    # Show msgstr if available (empty for .pot files)
+    if msgstr != "" do
+      Mix.shell().info("  msgstr \"#{msgstr}\" (preserved)")
     end
 
     :ok

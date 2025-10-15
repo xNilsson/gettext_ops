@@ -1,6 +1,4 @@
 defmodule Mix.Tasks.GettextOps.ListUntranslated do
-  use Mix.Task
-
   @shortdoc "List untranslated entries (empty msgstr)"
 
   @moduledoc """
@@ -42,6 +40,8 @@ defmodule Mix.Tasks.GettextOps.ListUntranslated do
   making it ideal for LLM workflows.
 
   """
+
+  use Mix.Task
 
   alias GettextOps.Operations.ListUntranslated
   alias GettextOps.Output

@@ -1,6 +1,4 @@
 defmodule Mix.Tasks.GettextOps.SearchValue do
-  use Mix.Task
-
   @shortdoc "Search for entries by msgstr (translated text)"
 
   @moduledoc """
@@ -34,6 +32,8 @@ defmodule Mix.Tasks.GettextOps.SearchValue do
       mix gettext_ops.search_value "knapp" --locale sv --json --limit 5
 
   """
+
+  use Mix.Task
 
   alias GettextOps.Operations.SearchValue
   alias GettextOps.Output

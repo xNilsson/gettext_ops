@@ -10,7 +10,19 @@ defmodule GettextOps.MixProject do
       package: package(),
       docs: docs(),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      dialyzer: [
+        plt_add_apps: [:mix, :ex_unit],
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+        flags: [:error_handling, :underspecs]
+      ],
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ]
     ]
   end
 
@@ -18,7 +30,8 @@ defmodule GettextOps.MixProject do
     [
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/xnilsson/gettext_ops"},
-      maintainers: ["Christopher Nilsson"]
+      maintainers: ["Christopher Nilsson"],
+      files: ~w(lib .formatter.exs mix.exs README.md LICENSE CHANGELOG.md)
     ]
   end
 
@@ -66,7 +79,10 @@ defmodule GettextOps.MixProject do
   defp deps do
     [
       {:expo, "~> 1.1"},
-      {:ex_doc, "~> 0.31", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.31", only: :dev, runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.18", only: :test}
     ]
   end
 end

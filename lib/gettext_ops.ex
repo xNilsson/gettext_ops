@@ -179,7 +179,9 @@ defmodule GettextOps do
       # => {:ok, %{updated: 0, not_found: ["Missing"]}}
 
   """
-  @spec translate(map(), keyword()) :: {:ok, map()} | {:error, term()}
+  @spec translate(map(), keyword()) ::
+          {:ok, %{updated: non_neg_integer(), not_found: [String.t()]}}
+          | {:error, String.t() | atom() | Exception.t()}
   def translate(translations, opts) when is_map(translations) and is_list(opts) do
     Translate.run(translations, opts)
   end
@@ -213,7 +215,14 @@ defmodule GettextOps do
       {:ok, result} = GettextOps.change_msgid("Old", "New", domain: "errors")
 
   """
-  @spec change_msgid(String.t(), String.t(), keyword()) :: {:ok, map()} | {:error, term()}
+  @spec change_msgid(String.t(), String.t(), keyword()) ::
+          {:ok,
+           %{
+             files_updated: non_neg_integer(),
+             entries_updated: non_neg_integer(),
+             changes: [map()]
+           }}
+          | {:error, String.t() | atom()}
   def change_msgid(old_msgid, new_msgid, opts \\ [])
       when is_binary(old_msgid) and is_binary(new_msgid) and is_list(opts) do
     ChangeMsgid.run(old_msgid, new_msgid, opts)

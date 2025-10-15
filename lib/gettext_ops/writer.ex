@@ -93,7 +93,7 @@ defmodule GettextOps.Writer do
 
   """
   @spec change_msgid(String.t(), String.t(), String.t()) ::
-          {:ok, %{updated: integer()}} | {:error, term()}
+          {:ok, %{updated: integer()}} | {:error, atom() | Exception.t()}
   def change_msgid(path, old_msgid, new_msgid)
       when is_binary(path) and is_binary(old_msgid) and is_binary(new_msgid) do
     updated_count = :counters.new(1, [:atomics])

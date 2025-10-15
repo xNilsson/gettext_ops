@@ -1,6 +1,4 @@
 defmodule Mix.Tasks.GettextOps.Translate do
-  use Mix.Task
-
   @shortdoc "Apply translations from stdin or file"
 
   @moduledoc """
@@ -90,6 +88,8 @@ defmodule Mix.Tasks.GettextOps.Translate do
   Use `--force` to continue with partial updates and get warnings instead.
 
   """
+
+  use Mix.Task
 
   alias GettextOps.Operations.Translate
 

@@ -21,3 +21,6 @@ gettext_ops-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# Dialyzer PLT files (machine-specific build artifacts)
+/priv/plts/
