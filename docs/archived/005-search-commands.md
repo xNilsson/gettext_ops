@@ -1,6 +1,6 @@
 # Task 005: Search Commands
 
-**Status:** `not-started`
+**Status:** `completed`
 **Created:** 2025-10-15
 **Depends On:** `002, 003, 004`
 **Can Be Parallelized:** Yes (parallel with 006, 007, 008)
@@ -27,14 +27,14 @@ For reference, the originial `poflow` implementation in go can be found at: ~/co
 
 ## Deliverables
 
-- [ ] `GettextOps.Operations.Search` module
-- [ ] `GettextOps.Operations.SearchValue` module
-- [ ] `mix gettext_ops.search` task
-- [ ] `mix gettext_ops.search_value` task
-- [ ] Support for regex and substring matching
-- [ ] JSON and text output
-- [ ] Limit option
-- [ ] Tests for both search types
+- [x] `GettextOps.Operations.Search` module
+- [x] `GettextOps.Operations.SearchValue` module
+- [x] `mix gettext_ops.search` task
+- [x] `mix gettext_ops.search_value` task
+- [x] Support for regex and substring matching
+- [x] JSON and text output
+- [x] Limit option
+- [x] Tests for both search types
 
 ---
 
@@ -132,21 +132,68 @@ Regex.compile!(pattern, "i")
 
 ## Acceptance Criteria
 
-- [ ] Both search commands work correctly
-- [ ] Substring and regex matching implemented
-- [ ] Limit option works
-- [ ] JSON and text output supported
-- [ ] Works with --locale flag
-- [ ] Helpful error messages
-- [ ] All tests passing
-- [ ] Commands documented with @moduledoc and @shortdoc
-- [ ] Functions documented with @doc and @spec
+- [x] Both search commands work correctly
+- [x] Substring and regex matching implemented
+- [x] Limit option works
+- [x] JSON and text output supported
+- [x] Works with --locale flag
+- [x] Helpful error messages
+- [x] All tests passing (53 search-related tests)
+- [x] Commands documented with @moduledoc and @shortdoc
+- [x] Functions documented with @doc and @spec
 
 ---
 
 ## Progress Log
 
-_Updates will be added here as work progresses_
+### 2025-10-15 - Starting Implementation
+- Beginning work on task 005
+- Dependencies completed: tasks 002 (Core Parsing), 003 (Config), 004 (Output Formatting)
+- Will implement both `search` (msgid) and `search_value` (msgstr) operations
+- Plan: Start with Search operation module, then tests, then Mix task, repeat for SearchValue
+
+### 2025-10-15 - Implementation Complete
+
+**Created Operation Modules:**
+- `lib/gettext_ops/operations/search.ex` - Search by msgid (source text)
+- `lib/gettext_ops/operations/search_value.ex` - Search by msgstr (translated text)
+
+**Key Implementation Details:**
+- Both operations support substring matching (case-insensitive by default)
+- Both operations support regex matching with `--regex` flag
+- Regex patterns are compiled with case-insensitive flag by default
+- Substring patterns are converted to case-insensitive regex using `Regex.escape/1`
+- Limit option properly restricts number of results
+- Full locale validation and helpful error messages
+
+**Created Mix Tasks:**
+- `lib/mix/tasks/gettext_ops.search.ex` - CLI interface for searching msgid
+- `lib/mix/tasks/gettext_ops.search_value.ex` - CLI interface for searching msgstr
+
+**Mix Task Features:**
+- Full OptionParser integration with short aliases (`-l`, `-d`, `-r`, `-n`, `-j`)
+- JSON and text output modes (delegates to `GettextOps.Output` module)
+- Comprehensive usage help text
+- Proper error handling and validation
+
+**Created Test Suites:**
+- `test/gettext_ops/operations/search_test.exs` (15 unit tests)
+- `test/gettext_ops/operations/search_value_test.exs` (16 unit tests)
+- `test/mix/tasks/gettext_ops.search_test.exs` (11 integration tests)
+- `test/mix/tasks/gettext_ops.search_value_test.exs` (11 integration tests)
+
+**Test Coverage:**
+- Substring and regex matching (case-insensitive)
+- Limit option functionality
+- JSON and text output formats
+- Error handling (missing arguments, invalid locale)
+- Short option aliases
+- Domain specification
+- Empty result sets
+
+**Total Tests for Task 005:** 53 tests, all passing
+
+**Acceptance Criteria:** All criteria met and verified through comprehensive test suite.
 
 ---
 
