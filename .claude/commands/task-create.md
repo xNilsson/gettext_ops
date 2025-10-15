@@ -1,4 +1,4 @@
-# Create New Task
+# Create new Task
 
 Create a new task file based on the template at `docs/template-task.md`.
 

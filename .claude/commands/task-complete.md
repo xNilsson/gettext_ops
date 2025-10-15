@@ -2,23 +2,23 @@
 
 Mark the current task as complete and move it to the archived folder.
 
+The current task has the ID: $1
+
 Steps:
 
-1. Identify which task is currently in-progress by reading task files in `docs/tasks/`
-2. If multiple tasks are in-progress, ask which one to complete
-3. If no task is in-progress, ask the user which task to complete
-4. Verify all acceptance criteria are met:
+1. Find the task in `docs/tasks/$1-*.md`
+2. Verify all acceptance criteria are met:
    - Read the task file
    - Check if deliverables are complete
    - Confirm tests are passing
    - Ask user if all acceptance criteria are met
-5. Update the task file:
+3. Update the task file:
    - Change Status to "completed"
    - Add final progress log entry with completion date
    - Note what was accomplished
-6. Move the task file to `docs/archived/[ID]-[name].md`
-7. Clear the todo list with TodoWrite (empty array)
-8. Provide a summary of what was completed
+4. Move the task file to `docs/archived/[ID]-[name].md`
+5. Clear the todo list with TodoWrite (empty array)
+6. Provide a summary of what was completed
 
 Example output:
 ```
