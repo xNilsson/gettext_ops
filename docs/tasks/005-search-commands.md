@@ -21,6 +21,8 @@ Users need to search for specific translation entries without opening large .po 
 
 Both support substring matching (case-insensitive) and regex patterns.
 
+For reference, the originial `poflow` implementation in go can be found at: ~/code/poflow
+
 ---
 
 ## Deliverables

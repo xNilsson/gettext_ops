@@ -17,6 +17,8 @@ Implement configuration system and path resolution for finding .po files in Phoe
 
 gettext_ops needs to locate .po files in the standard Phoenix Gettext structure: `priv/gettext/{locale}/LC_MESSAGES/{domain}.po`. Configuration should be read from Phoenix's `config.exs` file, with sensible defaults.
 
+For reference, the originial `poflow` implementation in go can be found at: ~/code/poflow
+
 ---
 
 ## Deliverables

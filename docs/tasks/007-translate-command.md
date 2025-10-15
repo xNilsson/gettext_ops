@@ -23,6 +23,8 @@ Critical features:
 - Preserve comments, references, and formatting
 - Report what was updated and what wasn't found
 
+For reference, the originial `poflow` implementation in go can be found at: ~/code/poflow
+
 ---
 
 ## Deliverables

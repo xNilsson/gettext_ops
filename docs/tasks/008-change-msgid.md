@@ -22,6 +22,8 @@ When developers want to change the source text (msgid), they need to update it e
 
 This command automates that tedious process while keeping translations intact.
 
+For reference, the originial `poflow` implementation in go can be found at: ~/code/poflow
+
 ---
 
 ## Deliverables

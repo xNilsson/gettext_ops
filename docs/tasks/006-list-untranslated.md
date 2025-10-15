@@ -19,6 +19,8 @@ This is the most frequently used command for developers and LLMs. It shows what 
 
 **Token savings example:** Instead of reading a 5000-line .po file (~15k tokens), get exactly the 10 untranslated entries needed (~500 tokens).
 
+For reference, the originial `poflow` implementation in go can be found at: ~/code/poflow
+
 ---
 
 ## Deliverables

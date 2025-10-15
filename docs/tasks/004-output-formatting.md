@@ -20,6 +20,8 @@ All Mix tasks need to output results in two formats:
 
 This module provides consistent formatting across all commands.
 
+For reference, the originial `poflow` implementation in go can be found at: ~/code/poflow
+
 ---
 
 ## Deliverables

@@ -17,6 +17,8 @@ Complete comprehensive documentation, polish the codebase, and prepare for Hex.p
 
 This final task ensures the package is well-documented, tested, and ready for public use. All features should be complete before starting this task.
 
+For reference, the originial `poflow` implementation in go can be found at: ~/code/poflow
+
 ---
 
 ## Deliverables
