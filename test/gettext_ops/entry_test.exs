@@ -21,12 +21,22 @@ defmodule GettextOps.EntryTest do
     end
 
     test "returns true for empty plural forms" do
-      message = %Expo.Message.Plural{msgid: ["item"], msgid_plural: ["items"], msgstr: %{0 => [""], 1 => [""]}}
+      message = %Expo.Message.Plural{
+        msgid: ["item"],
+        msgid_plural: ["items"],
+        msgstr: %{0 => [""], 1 => [""]}
+      }
+
       assert Entry.untranslated?(message)
     end
 
     test "returns false for translated plural forms" do
-      message = %Expo.Message.Plural{msgid: ["item"], msgid_plural: ["items"], msgstr: %{0 => ["ett objekt"], 1 => ["objekt"]}}
+      message = %Expo.Message.Plural{
+        msgid: ["item"],
+        msgid_plural: ["items"],
+        msgstr: %{0 => ["ett objekt"], 1 => ["objekt"]}
+      }
+
       refute Entry.untranslated?(message)
     end
 
@@ -65,12 +75,22 @@ defmodule GettextOps.EntryTest do
     end
 
     test "returns first plural form for plural messages" do
-      message = %Expo.Message.Plural{msgid: ["item"], msgid_plural: ["items"], msgstr: %{0 => ["ett objekt"], 1 => ["objekt"]}}
+      message = %Expo.Message.Plural{
+        msgid: ["item"],
+        msgid_plural: ["items"],
+        msgstr: %{0 => ["ett objekt"], 1 => ["objekt"]}
+      }
+
       assert Entry.get_msgstr(message) == "ett objekt"
     end
 
     test "returns empty string for missing plural form 0" do
-      message = %Expo.Message.Plural{msgid: ["item"], msgid_plural: ["items"], msgstr: %{1 => ["objekt"]}}
+      message = %Expo.Message.Plural{
+        msgid: ["item"],
+        msgid_plural: ["items"],
+        msgstr: %{1 => ["objekt"]}
+      }
+
       assert Entry.get_msgstr(message) == ""
     end
 
@@ -131,7 +151,11 @@ defmodule GettextOps.EntryTest do
 
   describe "get_domain/1" do
     test "returns default for message with references" do
-      message = %Expo.Message.Singular{msgid: ["Hello"], references: [[{"lib/app_web/live/page_live.ex", 10}]]}
+      message = %Expo.Message.Singular{
+        msgid: ["Hello"],
+        references: [[{"lib/app_web/live/page_live.ex", 10}]]
+      }
+
       assert Entry.get_domain(message) == "default"
     end
 

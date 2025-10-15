@@ -24,9 +24,10 @@ defmodule GettextOps.ParserTest do
     test "parses messages with references" do
       assert {:ok, messages} = Parser.parse_file(@test_po)
 
-      welcome_msg = Enum.find(messages, fn msg ->
-        Entry.get_msgid(msg) == "Welcome to Phoenix!"
-      end)
+      welcome_msg =
+        Enum.find(messages, fn msg ->
+          Entry.get_msgid(msg) == "Welcome to Phoenix!"
+        end)
 
       assert welcome_msg != nil
       assert Entry.get_msgstr(welcome_msg) == "Välkommen till Phoenix!"
@@ -35,9 +36,10 @@ defmodule GettextOps.ParserTest do
     test "parses multi-line messages" do
       assert {:ok, messages} = Parser.parse_file(@multiline_po)
 
-      welcome_msg = Enum.find(messages, fn msg ->
-        String.contains?(Entry.get_msgid(msg), "Welcome to our application")
-      end)
+      welcome_msg =
+        Enum.find(messages, fn msg ->
+          String.contains?(Entry.get_msgid(msg), "Welcome to our application")
+        end)
 
       assert welcome_msg != nil
       assert String.contains?(Entry.get_msgstr(welcome_msg), "Välkommen till vår applikation")
@@ -88,9 +90,10 @@ defmodule GettextOps.ParserTest do
     test "finds untranslated multi-line messages" do
       assert {:ok, untranslated} = Parser.parse_untranslated(@multiline_po)
 
-      help_msg = Enum.find(untranslated, fn msg ->
-        String.contains?(Entry.get_msgid(msg), "Need help")
-      end)
+      help_msg =
+        Enum.find(untranslated, fn msg ->
+          String.contains?(Entry.get_msgid(msg), "Need help")
+        end)
 
       assert help_msg != nil
     end

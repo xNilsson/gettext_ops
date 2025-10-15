@@ -38,6 +38,7 @@ defmodule GettextOps.WriterTest do
 
       Enum.each(messages, fn msg ->
         msgstr = Entry.get_msgstr(msg)
+
         if msgstr != "" do
           assert String.starts_with?(msgstr, "PREFIX: ")
         end
@@ -97,14 +98,18 @@ defmodule GettextOps.WriterTest do
       # Verify translations were updated
       assert {:ok, messages} = Parser.parse_file(test_file)
 
-      profile_msg = Enum.find(messages, fn msg ->
-        Entry.get_msgid(msg) == "Profile settings"
-      end)
+      profile_msg =
+        Enum.find(messages, fn msg ->
+          Entry.get_msgid(msg) == "Profile settings"
+        end)
+
       assert Entry.get_msgstr(profile_msg) == "Profilinställningar"
 
-      creds_msg = Enum.find(messages, fn msg ->
-        Entry.get_msgid(msg) == "Invalid credentials"
-      end)
+      creds_msg =
+        Enum.find(messages, fn msg ->
+          Entry.get_msgid(msg) == "Invalid credentials"
+        end)
+
       assert Entry.get_msgstr(creds_msg) == "Ogiltiga uppgifter"
     end
 
@@ -113,9 +118,12 @@ defmodule GettextOps.WriterTest do
 
       # Get original message
       assert {:ok, original_messages} = Parser.parse_file(test_file)
-      original_msg = Enum.find(original_messages, fn msg ->
-        Entry.get_msgid(msg) == "User created successfully"
-      end)
+
+      original_msg =
+        Enum.find(original_messages, fn msg ->
+          Entry.get_msgid(msg) == "User created successfully"
+        end)
+
       original_msgstr = Entry.get_msgstr(original_msg)
 
       # Update only one message
@@ -124,9 +132,12 @@ defmodule GettextOps.WriterTest do
 
       # Verify other messages unchanged
       assert {:ok, updated_messages} = Parser.parse_file(test_file)
-      unchanged_msg = Enum.find(updated_messages, fn msg ->
-        Entry.get_msgid(msg) == "User created successfully"
-      end)
+
+      unchanged_msg =
+        Enum.find(updated_messages, fn msg ->
+          Entry.get_msgid(msg) == "User created successfully"
+        end)
+
       assert Entry.get_msgstr(unchanged_msg) == original_msgstr
     end
 
@@ -172,20 +183,26 @@ defmodule GettextOps.WriterTest do
 
       # Get original msgstr
       assert {:ok, original_messages} = Parser.parse_file(test_file)
-      original_msg = Enum.find(original_messages, fn msg ->
-        Entry.get_msgid(msg) == "Welcome to Phoenix!"
-      end)
+
+      original_msg =
+        Enum.find(original_messages, fn msg ->
+          Entry.get_msgid(msg) == "Welcome to Phoenix!"
+        end)
+
       original_msgstr = Entry.get_msgstr(original_msg)
 
       # Change msgid
       assert {:ok, %{updated: 1}} =
-        Writer.change_msgid(test_file, "Welcome to Phoenix!", "New msgid")
+               Writer.change_msgid(test_file, "Welcome to Phoenix!", "New msgid")
 
       # Verify msgstr is preserved
       assert {:ok, updated_messages} = Parser.parse_file(test_file)
-      updated_msg = Enum.find(updated_messages, fn msg ->
-        Entry.get_msgid(msg) == "New msgid"
-      end)
+
+      updated_msg =
+        Enum.find(updated_messages, fn msg ->
+          Entry.get_msgid(msg) == "New msgid"
+        end)
+
       assert Entry.get_msgstr(updated_msg) == original_msgstr
     end
 
@@ -193,7 +210,7 @@ defmodule GettextOps.WriterTest do
       File.cp!(@test_po, test_file)
 
       assert {:ok, %{updated: 0}} =
-        Writer.change_msgid(test_file, "NONEXISTENT", "New")
+               Writer.change_msgid(test_file, "NONEXISTENT", "New")
     end
 
     test "does not change other messages", %{test_file: test_file} do
@@ -203,7 +220,7 @@ defmodule GettextOps.WriterTest do
       original_count = length(original_messages)
 
       assert {:ok, %{updated: 1}} =
-        Writer.change_msgid(test_file, "Welcome to Phoenix!", "New msgid")
+               Writer.change_msgid(test_file, "Welcome to Phoenix!", "New msgid")
 
       assert {:ok, updated_messages} = Parser.parse_file(test_file)
       assert length(updated_messages) == original_count

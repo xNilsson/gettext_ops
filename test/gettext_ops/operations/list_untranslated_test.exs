@@ -109,8 +109,8 @@ defmodule GettextOps.Operations.ListUntranslatedTest do
 
       # Should not include "hello" which is translated
       refute Enum.any?(messages, fn message ->
-        message.msgid == ["hello"]
-      end)
+               message.msgid == ["hello"]
+             end)
     end
   end
 end
