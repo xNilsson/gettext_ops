@@ -1,0 +1,25 @@
+## `msgid`s in this file are extracted from the source code.
+## Run `mix gettext.extract` to update this file.
+msgid ""
+msgstr ""
+"Language: sv\n"
+
+#: lib/example_web/live/settings_live.ex:20
+msgid "Profile settings"
+msgstr ""
+
+#: lib/example_web/live/settings_live.ex:25
+msgid "Update your profile information"
+msgstr ""
+
+#: lib/example_web/controllers/auth_controller.ex:15
+msgid "Login successful"
+msgstr "Inloggning lyckades"
+
+#: lib/example_web/controllers/auth_controller.ex:20
+msgid "Invalid credentials"
+msgstr ""
+
+#: lib/example_web/controllers/auth_controller.ex:25
+msgid "Please try again"
+msgstr ""

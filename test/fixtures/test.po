@@ -1,0 +1,21 @@
+## `msgid`s in this file are extracted from the source code.
+## Run `mix gettext.extract` to update this file.
+msgid ""
+msgstr ""
+"Language: sv\n"
+
+#: lib/example_web/live/page_live.ex:10
+msgid "Welcome to Phoenix!"
+msgstr "Välkommen till Phoenix!"
+
+#: lib/example_web/live/page_live.ex:15
+msgid "Click here to get started"
+msgstr "Klicka här för att komma igång"
+
+#: lib/example_web/controllers/user_controller.ex:22
+msgid "User created successfully"
+msgstr "Användare skapad"
+
+#: lib/example_web/controllers/user_controller.ex:30
+msgid "Failed to create user"
+msgstr "Misslyckades skapa användare"

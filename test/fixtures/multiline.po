@@ -1,0 +1,31 @@
+## `msgid`s in this file are extracted from the source code.
+## Run `mix gettext.extract` to update this file.
+msgid ""
+msgstr ""
+"Language: sv\n"
+
+#: lib/example_web/templates/email/welcome.html.eex:10
+msgid ""
+"Welcome to our application!\n"
+"We're excited to have you here."
+msgstr ""
+"Välkommen till vår applikation!\n"
+"Vi är glada att ha dig här."
+
+#: lib/example_web/templates/email/welcome.html.eex:20
+msgid ""
+"To get started, please verify your email address by clicking the link below.\n"
+"If you didn't create this account, you can safely ignore this email."
+msgstr ""
+"För att komma igång, vänligen verifiera din e-postadress genom att klicka på länken nedan.\n"
+"Om du inte skapade detta konto kan du ignorera detta e-postmeddelande."
+
+#: lib/example_web/live/help_live.ex:15
+msgid ""
+"Need help?\n"
+"Contact our support team."
+msgstr ""
+
+#: lib/example_web/controllers/api/v1_controller.ex:40
+msgid "API request limit exceeded. Please try again later."
+msgstr "API-begränsning överskriden. Försök igen senare."
