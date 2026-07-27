@@ -82,6 +82,68 @@ defmodule GettextOps.Entry do
   end
 
   @doc """
+  Gets the normalised msgctxt of a message, or `nil` when it has no context.
+
+  Expo represents a missing context as `nil` and a present one as a list of
+  string chunks. An explicit `msgctxt ""` is treated as *no* context, matching
+  gettext (and Expo, which considers `msgctxt ""` and a bare msgid duplicates).
+
+  ## Examples
+
+      iex> message = %Expo.Message.Singular{msgid: ["Active"]}
+      iex> GettextOps.Entry.get_msgctxt(message)
+      nil
+
+      iex> message = %Expo.Message.Singular{msgid: ["Active"], msgctxt: ["token status"]}
+      iex> GettextOps.Entry.get_msgctxt(message)
+      "token status"
+
+      iex> message = %Expo.Message.Singular{msgid: ["Active"], msgctxt: [""]}
+      iex> GettextOps.Entry.get_msgctxt(message)
+      nil
+
+  """
+  @spec get_msgctxt(Message.t()) :: String.t() | nil
+  def get_msgctxt(%Message.Singular{msgctxt: msgctxt}), do: normalize_msgctxt(msgctxt)
+  def get_msgctxt(%Message.Plural{msgctxt: msgctxt}), do: normalize_msgctxt(msgctxt)
+
+  defp normalize_msgctxt(nil), do: nil
+  defp normalize_msgctxt(msgctxt) when is_binary(msgctxt), do: normalize_msgctxt([msgctxt])
+
+  defp normalize_msgctxt(msgctxt) when is_list(msgctxt) do
+    case Enum.join(msgctxt, "") do
+      "" -> nil
+      context -> context
+    end
+  end
+
+  @doc """
+  Returns the gettext identity of a message as a `{msgctxt, msgid}` tuple.
+
+  This — not the msgid alone — is what uniquely identifies an entry in a
+  catalogue. Two entries sharing a msgid but carrying different `msgctxt`
+  values are distinct entries, and keying them by msgid alone silently
+  collapses one onto the other.
+
+  `msgid_plural` is deliberately *not* part of the key: gettext identifies a
+  plural entry by its singular msgid, and Expo rejects a catalogue that holds
+  both a singular and a plural entry for the same `{msgctxt, msgid}` pair.
+
+  ## Examples
+
+      iex> message = %Expo.Message.Singular{msgid: ["Active"]}
+      iex> GettextOps.Entry.key(message)
+      {nil, "Active"}
+
+      iex> message = %Expo.Message.Singular{msgid: ["Active"], msgctxt: ["token status"]}
+      iex> GettextOps.Entry.key(message)
+      {"token status", "Active"}
+
+  """
+  @spec key(Message.t()) :: {String.t() | nil, String.t()}
+  def key(message), do: {get_msgctxt(message), get_msgid(message)}
+
+  @doc """
   Gets the msgstr as a string from a message.
 
   Handles multi-line msgstrs by joining them together.

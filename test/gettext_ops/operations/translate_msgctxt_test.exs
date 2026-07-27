@@ -86,7 +86,7 @@ defmodule GettextOps.Operations.TranslateMsgctxtTest do
         |> Enum.map(&Entry.key/1)
 
       assert keys == Enum.uniq(keys)
-      assert length(keys) == 7
+      assert length(keys) == 9
     end
 
     test "preserves a context-carrying plural entry unchanged", %{
@@ -121,6 +121,33 @@ defmodule GettextOps.Operations.TranslateMsgctxtTest do
       assert entries[{nil, "Active"}] == "Påslagen"
       assert entries[{"token status", "Active"}] == "Giltig"
       assert entries[{"user status", "Active"}] == "Aktiverad"
+    end
+  end
+
+  describe "a msgid that exists only under several contexts" do
+    test "is reported rather than guessed at", %{test_locale: locale, test_file: test_file} do
+      before = read_entries(test_file)
+
+      {:error, message} = Translate.run(%{"Record" => "Inspelning"}, locale: locale)
+
+      assert message =~ "ambiguous msgid"
+      assert message =~ "Record"
+      assert message =~ "noun"
+      assert message =~ "verb"
+
+      # Nothing was written
+      assert read_entries(test_file) == before
+    end
+
+    test "is skipped and reported with force", %{test_locale: locale, test_file: test_file} do
+      {:ok, result} = Translate.run(%{"Record" => "Inspelning"}, locale: locale, force: true)
+
+      assert result.updated == 0
+      assert result.ambiguous == [{"Record", ["noun", "verb"]}]
+
+      entries = read_entries(test_file)
+      assert entries[{"noun", "Record"}] == "Post"
+      assert entries[{"verb", "Record"}] == "Spela in"
     end
   end
 

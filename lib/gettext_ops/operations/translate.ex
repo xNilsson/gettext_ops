@@ -49,7 +49,7 @@ defmodule GettextOps.Operations.Translate do
 
   """
 
-  alias GettextOps.{Config, Parser, Entry}
+  alias GettextOps.{Config, Parser, Entry, Writer}
   alias Expo.Message
 
   @doc """
@@ -172,21 +172,22 @@ defmodule GettextOps.Operations.Translate do
         # Apply translations and track results
         {updated_messages, stats} = apply_translations(messages.messages, translations)
 
-        # Check if any msgids were not found
-        if not force and length(stats.not_found) > 0 do
-          {:error, "msgid not found: #{Enum.join(stats.not_found, ", ")}"}
-        else
-          # Create updated Messages struct
-          updated = %{messages | messages: updated_messages}
+        cond do
+          # Check if any msgids were not found
+          not force and stats.not_found != [] ->
+            {:error, "msgid not found: #{Enum.join(stats.not_found, ", ")}"}
 
-          # Write atomically
-          case write_po_file_atomic(po_path, updated) do
-            :ok ->
+          # Check if any msgids exist only under a msgctxt we cannot choose between
+          not force and stats.ambiguous != [] ->
+            {:error, ambiguous_error(stats.ambiguous)}
+
+          true ->
+            # Never write a catalogue that could not be read back
+            with :ok <- Writer.check_duplicates(updated_messages),
+                 updated = %{messages | messages: updated_messages},
+                 :ok <- write_po_file_atomic(po_path, updated) do
               {:ok, stats}
-
-            {:error, reason} ->
-              {:error, reason}
-          end
+            end
         end
 
       {:error, reason} ->
@@ -196,43 +197,89 @@ defmodule GettextOps.Operations.Translate do
 
   # Apply translations to messages and track statistics
   @spec apply_translations([Message.t()], map()) ::
-          {[Message.t()], %{updated: non_neg_integer(), not_found: [String.t()]}}
+          {[Message.t()],
+           %{
+             updated: non_neg_integer(),
+             not_found: [String.t()],
+             ambiguous: [{String.t(), [String.t()]}]
+           }}
   defp apply_translations(messages, translations) do
-    # Build a map of msgid => message for quick lookup
-    message_map =
-      messages
-      |> Enum.map(fn msg -> {Entry.get_msgid(msg), msg} end)
-      |> Map.new()
+    # Translation input carries a bare msgid, but a catalogue entry is
+    # identified by {msgctxt, msgid}. Group candidates by msgid so each
+    # translation can be resolved to exactly one entry.
+    candidates_by_msgid = Enum.group_by(messages, &Entry.get_msgid/1)
 
-    # Apply each translation
-    {updated_map, stats} =
-      Enum.reduce(translations, {message_map, %{updated: 0, not_found: []}}, fn {msgid, msgstr},
-                                                                                {acc_map,
-                                                                                 acc_stats} ->
-        case Map.get(acc_map, msgid) do
-          nil ->
-            # msgid not found
+    empty_stats = %{updated: 0, not_found: [], ambiguous: []}
+
+    # Collect only the entries a translation actually resolved to, keyed by
+    # their full identity.
+    {replacements, stats} =
+      Enum.reduce(translations, {%{}, empty_stats}, fn {msgid, msgstr}, {acc_map, acc_stats} ->
+        case resolve_target(Map.get(candidates_by_msgid, msgid, [])) do
+          {:ok, message} ->
+            acc_map = Map.put(acc_map, Entry.key(message), Entry.update_msgstr(message, msgstr))
+            {acc_map, %{acc_stats | updated: acc_stats.updated + 1}}
+
+          :not_found ->
             {acc_map, %{acc_stats | not_found: [msgid | acc_stats.not_found]}}
 
-          message ->
-            # Update the message
-            updated_message = Entry.update_msgstr(message, msgstr)
-            updated_map = Map.put(acc_map, msgid, updated_message)
-            {updated_map, %{acc_stats | updated: acc_stats.updated + 1}}
+          {:ambiguous, contexts} ->
+            {acc_map, %{acc_stats | ambiguous: [{msgid, contexts} | acc_stats.ambiguous]}}
         end
       end)
 
-    # Convert back to list, preserving order
+    # Rebuild in place: every message that no translation resolved to is
+    # carried through untouched.
     updated_messages =
-      Enum.map(messages, fn msg ->
-        msgid = Entry.get_msgid(msg)
-        Map.get(updated_map, msgid, msg)
-      end)
+      Enum.map(messages, fn msg -> Map.get(replacements, Entry.key(msg), msg) end)
 
-    # Reverse not_found list to preserve original order
-    stats = %{stats | not_found: Enum.reverse(stats.not_found)}
+    # Reverse accumulated lists to preserve original input order
+    stats = %{
+      stats
+      | not_found: Enum.reverse(stats.not_found),
+        ambiguous: Enum.reverse(stats.ambiguous)
+    }
 
     {updated_messages, stats}
+  end
+
+  # Pick the single entry a bare msgid refers to.
+  #
+  # With several candidates the contextless entry wins, since a translation
+  # given without a context is the contextless one. A msgid that exists *only*
+  # under two or more different msgctxt values cannot be resolved and is
+  # reported rather than guessed at.
+  @spec resolve_target([Message.t()]) ::
+          {:ok, Message.t()} | :not_found | {:ambiguous, [String.t()]}
+  defp resolve_target([]), do: :not_found
+  defp resolve_target([message]), do: {:ok, message}
+
+  defp resolve_target(candidates) do
+    case Enum.filter(candidates, &is_nil(Entry.get_msgctxt(&1))) do
+      [message] ->
+        {:ok, message}
+
+      _ ->
+        contexts =
+          candidates
+          |> Enum.map(&Entry.get_msgctxt/1)
+          |> Enum.reject(&is_nil/1)
+          |> Enum.sort()
+
+        {:ambiguous, contexts}
+    end
+  end
+
+  # Build the error message for msgids that exist only under several contexts
+  @spec ambiguous_error([{String.t(), [String.t()]}]) :: String.t()
+  defp ambiguous_error(ambiguous) do
+    details =
+      Enum.map_join(ambiguous, "; ", fn {msgid, contexts} ->
+        quoted_contexts = Enum.map_join(contexts, ", ", fn context -> ~s("#{context}") end)
+        ~s("#{msgid}") <> " (msgctxt: " <> quoted_contexts <> ")"
+      end)
+
+    "ambiguous msgid, exists only with a msgctxt: #{details}"
   end
 
   # Write .po file atomically using a temporary file
