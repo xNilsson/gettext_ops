@@ -271,7 +271,37 @@ msgid text = msgstr translation
 - `--locale` / `-l` - Target locale (required)
 - `--domain` / `-d` - Gettext domain (default: `default`)
 - `--file` / `-f` - Input file (uses stdin if not provided)
-- `--force` - Continue even if msgid not found (show warnings)
+- `--force` - Continue even if a msgid is not found or ambiguous (show warnings)
+
+**Entries with a `msgctxt`**
+
+Gettext identifies an entry by the pair `{msgctxt, msgid}`, so a catalogue can
+hold several entries with the same msgid but different contexts:
+
+```po
+msgid "Active"
+msgstr "Aktiv"
+
+msgctxt "token status"
+msgid "Active"
+msgstr "Giltig"
+```
+
+The input format carries only a msgid, so `translate` resolves it as follows:
+
+- If exactly one entry has that msgid, it is updated.
+- If several do, the **contextless** entry is updated and the context-carrying
+  ones are left alone.
+- If the msgid exists *only* under two or more different contexts, it cannot be
+  resolved. The command reports it and writes nothing; with `--force` it is
+  skipped and listed under "Ambiguous".
+
+To target a context-carrying entry directly, use the programmatic API with a
+`{msgctxt, msgid}` key:
+
+```elixir
+GettextOps.Writer.update_translations(path, %{{"token status", "Active"} => "Giltig"})
+```
 
 **Examples:**
 
@@ -327,7 +357,9 @@ mix gettext_ops.change_msgid --dry-run "Sign In" "Log In"
 **What it does:**
 1. Finds all `.po` files in `priv/gettext/*/LC_MESSAGES/`
 2. Finds `.pot` template files
-3. Updates the msgid in all matching entries across all locales
+3. Updates the msgid in all matching entries across all locales, including
+   context-carrying ones — a typo in the source text is a typo in each of its
+   contexts
 4. Preserves all translations (msgstr values remain intact)
 5. Updates source code references if applicable
 6. Shows summary of changes
@@ -509,6 +541,20 @@ Check for:
 - Extra whitespace
 - Different quotes
 - Typos
+
+### "ambiguous msgid" when translating
+
+The msgid exists in the .po file only under two or more different `msgctxt`
+values, so a bare msgid cannot say which entry you mean. The command lists the
+contexts it found. Use the programmatic API with a `{msgctxt, msgid}` key to
+target one, or `--force` to skip it.
+
+### "refusing to write: would produce duplicate entries"
+
+The operation would have produced a .po file holding two entries with the same
+`{msgctxt, msgid}` pair — a file gettext and `Expo.PO.parse_file!/1` cannot
+read. The file is left untouched. This usually means a `change_msgid` rename
+collided with a msgid the file already uses.
 
 ### JSON output is malformed
 

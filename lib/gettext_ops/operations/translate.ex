@@ -20,6 +20,18 @@ defmodule GettextOps.Operations.Translate do
 
   Empty lines and lines starting with `#` are ignored.
 
+  ## Entries with a msgctxt
+
+  Gettext identifies an entry by the pair `{msgctxt, msgid}`, so a catalogue may
+  hold several entries with the same msgid under different contexts. The input
+  format carries only a msgid, which is resolved as follows:
+
+  - exactly one entry has that msgid — it is updated;
+  - several do — the **contextless** entry is updated, and context-carrying
+    siblings are left untouched;
+  - the msgid exists *only* under two or more contexts — it cannot be resolved,
+    and is reported in `:ambiguous` rather than guessed at.
+
   ## Atomic Updates
 
   Updates are performed atomically by writing to a temporary file and then
@@ -30,7 +42,7 @@ defmodule GettextOps.Operations.Translate do
 
   - `:locale` - (required) The locale to update (e.g., "sv", "en")
   - `:domain` - The domain to update (defaults to configured default_domain)
-  - `:force` - Continue even if some msgids are not found (default: false)
+  - `:force` - Continue even if some msgids are not found or ambiguous (default: false)
 
   ## Examples
 
@@ -120,6 +132,8 @@ defmodule GettextOps.Operations.Translate do
   The result map contains:
   - `:updated` - Number of translations successfully applied
   - `:not_found` - List of msgids that were not found in the .po file
+  - `:ambiguous` - List of `{msgid, contexts}` for msgids that exist only under
+    two or more different `msgctxt` values and so could not be resolved
 
   ## Examples
 
@@ -139,7 +153,13 @@ defmodule GettextOps.Operations.Translate do
 
   """
   @spec run(map(), keyword()) ::
-          {:ok, %{updated: non_neg_integer(), not_found: [String.t()]}} | {:error, term()}
+          {:ok,
+           %{
+             updated: non_neg_integer(),
+             not_found: [String.t()],
+             ambiguous: [{String.t(), [String.t()]}]
+           }}
+          | {:error, term()}
   def run(translations, opts) when is_map(translations) do
     # Extract options
     locale = Keyword.fetch!(opts, :locale)
@@ -164,7 +184,13 @@ defmodule GettextOps.Operations.Translate do
 
   # Perform the actual translation update
   @spec do_translate(String.t(), map(), boolean()) ::
-          {:ok, %{updated: non_neg_integer(), not_found: [String.t()]}} | {:error, term()}
+          {:ok,
+           %{
+             updated: non_neg_integer(),
+             not_found: [String.t()],
+             ambiguous: [{String.t(), [String.t()]}]
+           }}
+          | {:error, term()}
   defp do_translate(po_path, translations, force) do
     # Parse the full .po file (we need the complete structure for Expo.PO.compose)
     case Parser.parse_file_full(po_path) do

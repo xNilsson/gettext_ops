@@ -174,8 +174,15 @@ defmodule Mix.Tasks.GettextOps.Translate do
   end
 
   # Print the result summary
-  @spec print_result(%{updated: non_neg_integer(), not_found: [String.t()]}, boolean()) :: :ok
-  defp print_result(%{updated: updated, not_found: not_found}, force) do
+  @spec print_result(
+          %{
+            updated: non_neg_integer(),
+            not_found: [String.t()],
+            ambiguous: [{String.t(), [String.t()]}]
+          },
+          boolean()
+        ) :: :ok
+  defp print_result(%{updated: updated, not_found: not_found} = result, force) do
     # Print success message
     Mix.shell().info("✓ Updated #{updated} translation(s)")
 
@@ -189,6 +196,17 @@ defmodule Mix.Tasks.GettextOps.Translate do
 
       Enum.each(not_found, fn msgid ->
         Mix.shell().info("  - #{msgid}")
+      end)
+    end
+
+    # Print msgids that exist only under a msgctxt and so could not be resolved
+    ambiguous = Map.get(result, :ambiguous, [])
+
+    if length(ambiguous) > 0 do
+      Mix.shell().info("\nAmbiguous (#{length(ambiguous)} msgid(s) exist only with a msgctxt):")
+
+      Enum.each(ambiguous, fn {msgid, contexts} ->
+        Mix.shell().info("  - #{msgid} (msgctxt: #{Enum.join(contexts, ", ")})")
       end)
     end
 

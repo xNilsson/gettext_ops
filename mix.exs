@@ -4,7 +4,7 @@ defmodule GettextOps.MixProject do
   def project do
     [
       app: :gettext_ops,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.18",
       description: "Targeted Mix tasks for Phoenix Gettext translations",
       package: package(),
@@ -40,7 +40,7 @@ defmodule GettextOps.MixProject do
       main: "GettextOps",
       extras: ["README.md", "CHANGELOG.md", "LICENSE"],
       source_url: "https://github.com/xnilsson/gettext_ops",
-      source_ref: "v0.1.0",
+      source_ref: "v0.1.1",
       groups_for_modules: [
         Core: [
           GettextOps,
