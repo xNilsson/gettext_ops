@@ -180,7 +180,12 @@ defmodule GettextOps do
 
   """
   @spec translate(map(), keyword()) ::
-          {:ok, %{updated: non_neg_integer(), not_found: [String.t()]}}
+          {:ok,
+           %{
+             updated: non_neg_integer(),
+             not_found: [String.t()],
+             ambiguous: [{String.t(), [String.t()]}]
+           }}
           | {:error, String.t() | atom() | Exception.t()}
   def translate(translations, opts) when is_map(translations) and is_list(opts) do
     Translate.run(translations, opts)

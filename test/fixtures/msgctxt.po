@@ -1,0 +1,41 @@
+## Fixture exercising msgctxt-disambiguated entries.
+## Several msgids appear more than once, distinguished only by msgctxt.
+msgid ""
+msgstr ""
+"Language: sv\n"
+
+msgid "Active"
+msgstr "Aktiv"
+
+msgctxt "token status"
+msgid "Active"
+msgstr "Giltig"
+
+msgctxt "user status"
+msgid "Active"
+msgstr "Aktiverad"
+
+msgid "Sign In"
+msgstr ""
+
+msgctxt "cart"
+msgid "%{count} item"
+msgid_plural "%{count} items"
+msgstr[0] "%{count} vara"
+msgstr[1] "%{count} varor"
+
+msgid "Open"
+msgstr "Öppna"
+
+msgctxt "verb"
+msgid "Open"
+msgstr "Öppna filen"
+
+## "Record" exists ONLY under a context, so a bare msgid cannot resolve it.
+msgctxt "noun"
+msgid "Record"
+msgstr "Post"
+
+msgctxt "verb"
+msgid "Record"
+msgstr "Spela in"

@@ -44,7 +44,7 @@ defmodule GettextOps.Operations.ChangeMsgid do
 
   """
 
-  alias GettextOps.{Config, Parser, Entry}
+  alias GettextOps.{Config, Parser, Entry, Writer}
   alias Expo.Message
 
   @doc """
@@ -216,16 +216,12 @@ defmodule GettextOps.Operations.ChangeMsgid do
         if dry_run or count == 0 do
           {:ok, count, sample_msgstr}
         else
-          # Create updated Messages struct
-          updated = %{messages | messages: updated_messages}
-
-          # Write atomically
-          case write_po_file_atomic(file_path, updated) do
-            :ok ->
-              {:ok, count, sample_msgstr}
-
-            {:error, reason} ->
-              {:error, reason}
+          # Renaming a msgid onto one the file already uses would produce a
+          # catalogue that cannot be read back. Refuse rather than corrupt it.
+          with :ok <- Writer.check_duplicates(updated_messages),
+               updated = %{messages | messages: updated_messages},
+               :ok <- write_po_file_atomic(file_path, updated) do
+            {:ok, count, sample_msgstr}
           end
         end
 

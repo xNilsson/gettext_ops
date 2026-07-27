@@ -28,6 +28,7 @@ defmodule GettextOps.Writer do
   def update_file(path, update_fn) when is_binary(path) and is_function(update_fn, 1) do
     with {:ok, po_messages} <- Parser.parse_file_full(path),
          updated_messages = update_messages(po_messages.messages, update_fn),
+         :ok <- check_duplicates(updated_messages),
          updated_po = %{po_messages | messages: updated_messages},
          iodata = Expo.PO.compose(updated_po),
          :ok <- File.write(path, iodata) do
@@ -40,7 +41,17 @@ defmodule GettextOps.Writer do
   @doc """
   Updates specific translations in a .po file.
 
-  Accepts a map of `msgid => msgstr` and updates matching messages.
+  Accepts a map whose keys identify entries and whose values are the new
+  msgstr. A key may be either:
+
+  - a `{msgctxt, msgid}` tuple, matching that exact entry; or
+  - a plain msgid string, matching only the entry that carries **no** msgctxt.
+
+  A bare msgid deliberately does not match context-carrying entries. Entries
+  that share a msgid but differ in msgctxt are distinct translations, and
+  matching on msgid alone used to overwrite every one of them with the same
+  string. Pass a `{msgctxt, msgid}` tuple to target a context-carrying entry.
+
   Returns `{:ok, %{updated: count}}` with the number of updated messages.
 
   ## Examples
@@ -50,16 +61,29 @@ defmodule GettextOps.Writer do
       GettextOps.Writer.update_translations("path/to/file.po", translations)
       # => {:ok, %{updated: 2}}
 
+      # Target a context-carrying entry
+      translations = %{{"token status", "Active"} => "Giltig"}
+      GettextOps.Writer.update_translations("path/to/file.po", translations)
+      # => {:ok, %{updated: 1}}
+
   """
-  @spec update_translations(String.t(), %{String.t() => String.t()}) ::
+  @spec update_translations(
+          String.t(),
+          %{(String.t() | {String.t() | nil, String.t()}) => String.t()}
+        ) ::
           {:ok, %{updated: integer()}} | {:error, term()}
   def update_translations(path, translations) when is_binary(path) and is_map(translations) do
     updated_count = :counters.new(1, [:atomics])
 
-    update_fn = fn message ->
-      msgid = Entry.get_msgid(message)
+    # Normalise bare msgid keys to the {nil, msgid} identity of a contextless entry
+    by_key =
+      Map.new(translations, fn
+        {{_msgctxt, _msgid} = key, msgstr} -> {key, msgstr}
+        {msgid, msgstr} when is_binary(msgid) -> {{nil, msgid}, msgstr}
+      end)
 
-      case Map.get(translations, msgid) do
+    update_fn = fn message ->
+      case Map.get(by_key, Entry.key(message)) do
         nil ->
           message
 
@@ -82,7 +106,14 @@ defmodule GettextOps.Writer do
   @doc """
   Changes all occurrences of a msgid to a new msgid in a .po file.
 
-  This is useful for refactoring translation keys across the codebase.
+  This is useful for refactoring translation keys across the codebase. Every
+  entry with this msgid is renamed, including context-carrying ones — a typo in
+  the source text is a typo in each of its contexts.
+
+  If the rename would collide with a msgid the file already uses, the file is
+  left untouched and `{:error, reason}` is returned; writing it would produce a
+  catalogue that cannot be read back.
+
   Returns `{:ok, %{updated: count}}` with the number of updated messages.
 
   ## Examples
@@ -118,6 +149,49 @@ defmodule GettextOps.Writer do
         {:error, reason}
     end
   end
+
+  @doc """
+  Checks that no two messages share a `{msgctxt, msgid}` identity.
+
+  A .po file holding two entries with the same identity cannot be read back —
+  `Expo.PO.parse_file!/1` raises `Expo.PO.DuplicateMessagesError`, which breaks
+  compilation of the whole consuming application. Call this before writing so
+  a bug that would corrupt a catalogue surfaces as a loud error instead.
+
+  Returns `:ok`, or `{:error, reason}` naming the offending entries.
+
+  ## Examples
+
+      messages = [
+        %Expo.Message.Singular{msgid: ["Active"]},
+        %Expo.Message.Singular{msgid: ["Active"], msgctxt: ["token status"]}
+      ]
+      GettextOps.Writer.check_duplicates(messages)
+      # => :ok
+
+  """
+  @spec check_duplicates([Message.t()]) :: :ok | {:error, String.t()}
+  def check_duplicates(messages) when is_list(messages) do
+    duplicates =
+      messages
+      |> Enum.map(&Entry.key/1)
+      |> Enum.frequencies()
+      |> Enum.filter(fn {_key, count} -> count > 1 end)
+      |> Enum.map(fn {key, _count} -> key end)
+
+    case duplicates do
+      [] ->
+        :ok
+
+      keys ->
+        {:error,
+         "refusing to write: would produce duplicate entries for " <>
+           Enum.map_join(keys, ", ", &describe_key/1)}
+    end
+  end
+
+  defp describe_key({nil, msgid}), do: ~s(msgid "#{msgid}")
+  defp describe_key({msgctxt, msgid}), do: ~s(msgctxt "#{msgctxt}" / msgid "#{msgid}")
 
   @doc """
   Writes a new .po file with the given messages.

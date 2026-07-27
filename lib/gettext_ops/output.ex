@@ -32,10 +32,11 @@ defmodule GettextOps.Output do
     msgid = Entry.get_msgid(message)
     msgstr = Entry.get_msgstr(message)
 
-    """
-    msgid "#{escape_string(msgid)}"
-    msgstr "#{escape_string(msgstr)}"
-    """
+    msgctxt_line(message) <>
+      """
+      msgid "#{escape_string(msgid)}"
+      msgstr "#{escape_string(msgstr)}"
+      """
   end
 
   def format_text(%Message.Plural{} = message) do
@@ -52,11 +53,21 @@ defmodule GettextOps.Output do
       end)
       |> Enum.join("\n")
 
-    """
-    msgid "#{escape_string(msgid)}"
-    msgid_plural "#{escape_string(msgid_plural)}"
-    #{msgstr_lines}
-    """
+    msgctxt_line(message) <>
+      """
+      msgid "#{escape_string(msgid)}"
+      msgid_plural "#{escape_string(msgid_plural)}"
+      #{msgstr_lines}
+      """
+  end
+
+  # A context-carrying entry is a different entry from a contextless one with
+  # the same msgid, so the msgctxt has to be shown to tell them apart.
+  defp msgctxt_line(message) do
+    case Entry.get_msgctxt(message) do
+      nil -> ""
+      msgctxt -> ~s(msgctxt "#{escape_string(msgctxt)}"\n)
+    end
   end
 
   @doc """
@@ -90,6 +101,7 @@ defmodule GettextOps.Output do
   The map includes:
   - `msgid`: The message ID
   - `msgstr`: The message string (for plurals, the first form)
+  - `msgctxt`: The message context (only if the entry has one)
   - `references`: List of "file:line" strings (if present)
   - `comments`: List of comment strings (if present)
   - `flags`: List of flag strings (if present)
@@ -108,6 +120,14 @@ defmodule GettextOps.Output do
       iex> GettextOps.Output.to_map(message)
       %{msgid: "Sign In", msgstr: "", references: ["lib/auth.ex:12"]}
 
+      iex> message = %Expo.Message.Singular{
+      ...>   msgid: ["Active"],
+      ...>   msgstr: ["Giltig"],
+      ...>   msgctxt: ["token status"]
+      ...> }
+      iex> GettextOps.Output.to_map(message)
+      %{msgid: "Active", msgstr: "Giltig", msgctxt: "token status"}
+
   """
   @spec to_map(Message.t()) :: map()
   def to_map(message) do
@@ -117,6 +137,7 @@ defmodule GettextOps.Output do
     }
 
     base_map
+    |> add_msgctxt(message)
     |> add_references(message)
     |> add_comments(message)
     |> add_flags(message)
@@ -189,6 +210,13 @@ defmodule GettextOps.Output do
     |> String.replace("\n", "\\n")
     |> String.replace("\r", "\\r")
     |> String.replace("\t", "\\t")
+  end
+
+  defp add_msgctxt(map, message) do
+    case Entry.get_msgctxt(message) do
+      nil -> map
+      msgctxt -> Map.put(map, :msgctxt, msgctxt)
+    end
   end
 
   defp add_references(map, %Message.Singular{references: references}) do
